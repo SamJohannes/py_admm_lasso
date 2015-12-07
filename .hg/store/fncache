@@ -1,0 +1,9 @@
+data/setup.py.i
+data/pyadmm/utils.py.i
+data/pyadmm/__init__.py.i
+data/tests/test_lasso.py.i
+data/tests/test_basis_pursuite.py.i
+data/pyadmm/basis_pursuit.py.i
+data/.hgignore.i
+data/pyadmm/lasso.py.i
+data/README.txt.i

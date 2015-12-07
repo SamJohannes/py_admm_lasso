@@ -1,0 +1,14 @@
+syntax: glob
+
+libpython*.a
+*.o
+*.pyc
+*.pyo
+*.pyd
+*.cover
+*.orig
+*.rej
+
+.idea/
+
+
