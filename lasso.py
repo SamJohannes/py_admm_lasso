@@ -8,8 +8,8 @@
 import numpy as np
 import numpy.linalg as npl
 import numpy.random as npr
+from scipy import linalg as LA
 
-import utils
 import time
 
 
@@ -27,6 +27,15 @@ def factor(A, rho):
 
     return (L, U)
 
+def init_history():
+    history = {}
+    history["objval"] = list()
+    history["r_norm"] = list()
+    history["s_norm"] = list()
+    history["eps_pri"] = list()
+    history["eps_dual"] = list()
+
+    return history
 
 def shrinkage(x, kappa):
     """Computes the element-wise maximum of 0 and x - k"""
@@ -36,22 +45,22 @@ def shrinkage(x, kappa):
 
 def objective(A, b, lmbd, x, z):
     """ Objective function """
-    p = (1/float(2))*(np.sum(np.power((np.dot(A, x) - b), 2))) + \
-        lmbd*npl.norm(z, 1);
+    p = (1.0/2) * (np.sum(np.power((np.dot(A, x) - b), 2))) + \
+        lmbd * npl.norm(z, 1)
     return p
 
 
 def lasso(A, b, lmbd, rho, alpha):
     """
     Solves the lasso problem:
-         minimize 1/2*|| Ax - b ||_2^2 + \lambda || x ||_1
+         minimize 1/2*|| Ax - b ||_2^2 + lmbd || x ||_1
     via the ADMM method.
 
     Arguments:
     rho -- the augmented Lagrangian parameter (float)
     alpha -- the over-relaxation parameter (typical values for alpha are
     between 1.0 and 1.8) (float)
-    A, b, l -- the function inputs
+    A, b, lmbd -- the function inputs
     
     Returns:
     x -- the optimal solution in the form of column vector
@@ -59,7 +68,7 @@ def lasso(A, b, lmbd, rho, alpha):
     """
 
 
-    history = utils.init_history()
+    history = init_history()
     t_start = time.clock()
 
     QUIET    = False   # Set to False to print logging values
@@ -78,9 +87,7 @@ def lasso(A, b, lmbd, rho, alpha):
     u = np.zeros((n,1))
 
     # cache the factorization
-    s1 = time.clock()
     L, U = factor(A, rho)
-    print "factorisation" , time.clock() - s1
     
     if not QUIET:
         print "%3s\t%10s\t%10s\t%10s\t%10s\t%10s\n" % \
@@ -89,15 +96,14 @@ def lasso(A, b, lmbd, rho, alpha):
     for k in range(MAX_ITER):
 
         # x-update
-        s2 = time.clock()
         q = Atb + rho * (z - u) # temporary value
-        
+
         if( m >= n ): # if skinny
-            x = npl.solve(U, npl.solve(L, q))
+            x = LA.solve_triangular(U, LA.solve_triangular(L, q, lower=True))
         else: # if fat
             x = q/rho - np.dot(At, \
-                npl.solve(U, npl.solve(L, np.dot(A, q)))) / float(rho ** 2)
-        print "x-update: ", time.clock() - s2
+                    LA.solve_triangular(U, LA.solve_triangular(L, \
+                            np.dot(A, q), lower=True))) / (rho ** 2)
             
         # z-update with relaxation
 

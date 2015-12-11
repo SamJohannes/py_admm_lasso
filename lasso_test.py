@@ -3,25 +3,24 @@
 # Script for running basic analysis on the pyadmm lasso algorithm
 
 import data_generator as dg
-import pyadmm
+import lasso
 import numpy as np
 from numpy import linalg as LA
 import matplotlib.pyplot as plt
 
 
 def lasso_func(A, x, b, lmbda):
-    """Outputs result of the lasso function on given input"""
-    
+    """Outputs result of the lasso function on given input"""    
     q = (1.0/2) * (LA.norm(np.dot(A, x) - b, 2) ** 2) + lmbda * LA.norm(x, 1)
     return q
 
 
 
 def lasso_test():
-    """Runs sample"""
+    """Runs a sample problem through the lasso function"""
     
     (A, b, l) = dg.data_gen()
-    (x, hist) = pyadmm.lasso(A, b, l, 1.0, 1.0)
+    (x, hist) = lasso.lasso(A, b, l, 1.0, 1.0)
 
     K = len(hist['objval'])
     x = np.arange(K)
